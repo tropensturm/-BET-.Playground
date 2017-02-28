@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
+  <assemblyIdentity version="1.0.0.0" name="Playground.Interop.COM.NET4Callee" type="win32"/>
+  <clrClass clsid="{e0bafa8b-125e-4ac0-ad5c-72fd850024b9}"
+            progid="NET4Callee.COMAdapter"
+            threadingModel="Both"
+            name="_BET_.Playground.Interop.COM.NET4Callee.COMAdapter"
+            runtimeVersion="v4.0.30319" />
+</assembly>
