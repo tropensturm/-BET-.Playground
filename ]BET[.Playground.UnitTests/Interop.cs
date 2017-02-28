@@ -34,6 +34,7 @@ namespace _BET_.Playground.UnitTests
         {
             var net2CallerType = typeof(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper);
             Assembly net2Caller = Assembly.GetAssembly(net2CallerType);
+
             //Console.WriteLine(net2Caller.EntryPoint.Invoke(null, new object[] { new string[] { } }));
 
             // setup
