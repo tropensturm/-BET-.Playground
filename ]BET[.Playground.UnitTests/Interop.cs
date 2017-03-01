@@ -21,16 +21,27 @@ namespace _BET_.Playground.UnitTests
             Assert.AreEqual<string>("NET Dll Version v4.0.30319", target4Result);
         }
 
-        public void Execute()
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET2Caller_Try1()
         {
             var net2CallerType = typeof(_BET_.Playground.Interop.COM.NET2Caller.Program);
             Assembly net2Caller = Assembly.GetAssembly(net2CallerType);
-            Console.WriteLine(net2Caller.EntryPoint.Invoke(null, new object[] { new string[] { } }));
+
+            net2Caller.EntryPoint.Invoke(null, new object[] { new string[] { "UT" } });
+            var mainWrapper = net2Caller.GetType("_BET_.Playground.Interop.COM.NET2Caller.MainWrapper");
+            var callCOM = mainWrapper.GetMethod("CallCOM");
+
+            var instance = Activator.CreateInstance(mainWrapper);
+            var result = callCOM.Invoke(instance, null) as string;
+
+            Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
+            Assert.Inconclusive("applies not the app.manifest");
         }
 
         [TestMethod]
         [TestCategory("Interop")]
-        public void TestNET2Caller()
+        public void TestNET2Caller_Try2()
         {
             var net2CallerType = typeof(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper);
             Assembly net2Caller = Assembly.GetAssembly(net2CallerType);
@@ -59,12 +70,20 @@ namespace _BET_.Playground.UnitTests
                 var prg = net2CallerDomain.CreateInstanceAndUnwrap(net2Caller.FullName, net2CallerType.FullName) 
                     as _BET_.Playground.Interop.COM.NET2Caller.MainWrapper;
 
-                prg.CallCOM();
+                var result = prg.CallCOM();
+
+                Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
+            }
+            catch(Exception ex)
+            {
+                Assert.Fail(ex.Message);
             }
             finally
             {
                 AppDomain.Unload(net2CallerDomain);
             }
+            
+            Assert.Inconclusive("applies not the app.manifest");
         }
     }
 }
