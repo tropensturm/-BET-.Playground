@@ -46,7 +46,6 @@ namespace _BET_.Playground.UnitTests
         {
             var path = @"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\Playground.Interop.COM.NET2Caller.exe";
 
-            AssemblyLocator.Init();
             Assembly net2Caller = Assembly.LoadFrom(@"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\Playground.Interop.COM.NET2Caller.exe");
 
             net2Caller.EntryPoint.Invoke(null, new object[] { new string[] { "UT" } });
@@ -108,10 +107,8 @@ namespace _BET_.Playground.UnitTests
         [TestCategory("Interop")]
         public void TestNET2Caller_Try3()
         {
-            AssemblyLocator.Init();
             Assembly net2Caller = Assembly.LoadFrom(@"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\Playground.Interop.COM.NET2Caller.exe");
-
-
+            
             AppDomainSetup setup = new AppDomainSetup()
             {
                 PrivateBinPath = net2Caller.CodeBase,
