@@ -3,12 +3,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E03A8388-F1B1-48DA-9773-8408CC11E0C3}</ProjectGuid>
+    <ProjectGuid>{9A2911D3-FCC8-444D-860E-EA6DFF676D72}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>_BET_.Playground.UnitTests</RootNamespace>
-    <AssemblyName>]BET[.Playground.UnitTests</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RootNamespace>_BET_.Playground.UnitTests.NET40</RootNamespace>
+    <AssemblyName>]BET[.Playground.UnitTests.NET40</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -16,6 +16,7 @@
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -54,17 +55,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\]BET[.Playground.Core\]BET[.Playground.Core.csproj">
-      <Project>{a8d1ed81-e280-4dda-ab1a-ba4abe4199d9}</Project>
-      <Name>]BET[.Playground.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\]BET[.Playground.Interop.COM.NET2Caller\]BET[.Playground.Interop.COM.NET2Caller.csproj">
       <Project>{054d255e-74de-456f-9fe0-e19bcfdd6569}</Project>
       <Name>]BET[.Playground.Interop.COM.NET2Caller</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\]BET[.Playground.Interop.COM.NET4Callee\]BET[.Playground.Interop.COM.NET4Callee.csproj">
-      <Project>{1e2410f1-8b72-4c29-9dd7-358f5f28298f}</Project>
-      <Name>]BET[.Playground.Interop.COM.NET4Callee</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

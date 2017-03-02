@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "]BET[.Playground.Interop.CO
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "]BET[.Playground.UnitTests", "]BET[.Playground.UnitTests\]BET[.Playground.UnitTests.csproj", "{E03A8388-F1B1-48DA-9773-8408CC11E0C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "]BET[.Playground.Core", "]BET[.Playground.Core\]BET[.Playground.Core.csproj", "{A8D1ED81-E280-4DDA-AB1A-BA4ABE4199D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{E03A8388-F1B1-48DA-9773-8408CC11E0C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E03A8388-F1B1-48DA-9773-8408CC11E0C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E03A8388-F1B1-48DA-9773-8408CC11E0C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8D1ED81-E280-4DDA-AB1A-BA4ABE4199D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8D1ED81-E280-4DDA-AB1A-BA4ABE4199D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8D1ED81-E280-4DDA-AB1A-BA4ABE4199D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8D1ED81-E280-4DDA-AB1A-BA4ABE4199D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

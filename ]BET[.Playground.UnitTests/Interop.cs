@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using _BET_.Playground.Interop.COM.NET4Callee;
 using System.Reflection;
+using _BET_.Playground.Core;
 
 namespace _BET_.Playground.UnitTests
 {
@@ -34,6 +35,28 @@ namespace _BET_.Playground.UnitTests
 
             var instance = Activator.CreateInstance(mainWrapper);
             var result = callCOM.Invoke(instance, null) as string;
+
+            Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
+            Assert.Inconclusive("applies not the app.manifest");
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET2Caller_Try4()
+        {
+            var path = @"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\Playground.Interop.COM.NET2Caller.exe";
+
+            AssemblyLocator.Init();
+            Assembly net2Caller = Assembly.LoadFrom(@"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\Playground.Interop.COM.NET2Caller.exe");
+
+            net2Caller.EntryPoint.Invoke(null, new object[] { new string[] { "UT" } });
+            var mainWrapper = net2Caller.GetType("_BET_.Playground.Interop.COM.NET2Caller.MainWrapper");
+
+            var handler = Activator.CreateComInstanceFrom(path, "_BET_.Playground.Interop.COM.NET2Caller.MainWrapper");
+            var prg = handler.Unwrap();
+
+            var callCOM = prg.GetType().GetMethod("CallCOM");
+            var result = callCOM.Invoke(prg, null);
 
             Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
             Assert.Inconclusive("applies not the app.manifest");
@@ -85,7 +108,9 @@ namespace _BET_.Playground.UnitTests
         [TestCategory("Interop")]
         public void TestNET2Caller_Try3()
         {
+            AssemblyLocator.Init();
             Assembly net2Caller = Assembly.LoadFrom(@"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\Playground.Interop.COM.NET2Caller.exe");
+
 
             AppDomainSetup setup = new AppDomainSetup()
             {
