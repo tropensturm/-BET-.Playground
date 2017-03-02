@@ -85,13 +85,12 @@ namespace _BET_.Playground.UnitTests
         [TestCategory("Interop")]
         public void TestNET2Caller_Try3()
         {
-            var net2CallerType = typeof(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper);
-            Assembly net2Caller = Assembly.GetAssembly(net2CallerType);
+            Assembly net2Caller = Assembly.LoadFrom(@"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\Playground.Interop.COM.NET2Caller.exe");
 
             AppDomainSetup setup = new AppDomainSetup()
             {
-                PrivateBinPath = AppDomain.CurrentDomain.BaseDirectory,
-                ApplicationBase = AppDomain.CurrentDomain.BaseDirectory,
+                PrivateBinPath = net2Caller.CodeBase,
+                ApplicationBase = net2Caller.CodeBase,
                 ApplicationName = "TestNET2Caller",
                 ShadowCopyFiles = Boolean.TrueString
             };
@@ -109,7 +108,7 @@ namespace _BET_.Playground.UnitTests
                 // returns a remoting proxy you can use to communicate with in your main domain
                 // the object behind the proxy must implement MarshalByRefObject or else it will just serialize
                 // a copy back to the main domain!
-                var handle = net2CallerDomain.CreateComInstanceFrom(net2CallerType.Assembly.ManifestModule.FullyQualifiedName, net2CallerType.FullName);
+                var handle = net2CallerDomain.CreateComInstanceFrom(net2Caller.ManifestModule.FullyQualifiedName, net2Caller.GetType().FullName);
                 var prg = handle.Unwrap() as _BET_.Playground.Interop.COM.NET2Caller.MainWrapper;
                 var result = prg.CallCOM();
                 
@@ -117,14 +116,15 @@ namespace _BET_.Playground.UnitTests
             }
             catch (Exception ex)
             {
-                Assert.Fail(ex.Message);
+                Assert.AreEqual<int>(ex.HResult, -2146233054, "failed as expected");
+                Assert.Inconclusive("cannot load assembly because in .net 4.5 System.Runtime.InteropServices moved from system.core to mscorlib :( no work around known to me");
             }
             finally
             {
                 AppDomain.Unload(net2CallerDomain);
             }
 
-            Assert.Inconclusive("applies not the app.manifest");
+            Assert.Fail("should never hit here");
         }
     }
 }
