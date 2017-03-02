@@ -56,7 +56,7 @@ namespace _BET_.Playground.UnitTests
             var prg = handler.Unwrap();
 
             var callCOM = prg.GetType().GetMethod("CallCOM");
-            var result = callCOM.Invoke(prg, null);
+            var result = callCOM.Invoke(prg, null) as string;
 
             Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
             Assert.Inconclusive("applies not the app.manifest");
