@@ -47,9 +47,6 @@ namespace _BET_.Playground.UnitTests
             Assembly net2Caller = Assembly.GetAssembly(net2CallerType);
 
             // setup
-            AppDomainSetup setup2 = new AppDomainSetup()
-            {
-            };
             AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
             
             // create domain
@@ -81,6 +78,52 @@ namespace _BET_.Playground.UnitTests
                 AppDomain.Unload(net2CallerDomain);
             }
             
+            Assert.Inconclusive("applies not the app.manifest");
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET2Caller_Try3()
+        {
+            var net2CallerType = typeof(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper);
+            Assembly net2Caller = Assembly.GetAssembly(net2CallerType);
+
+            AppDomainSetup setup = new AppDomainSetup()
+            {
+                PrivateBinPath = AppDomain.CurrentDomain.BaseDirectory,
+                ApplicationBase = AppDomain.CurrentDomain.BaseDirectory,
+                ApplicationName = "TestNET2Caller",
+                ShadowCopyFiles = Boolean.TrueString
+            };
+            
+            // create domain
+            AppDomain net2CallerDomain = AppDomain.CreateDomain(
+                "TestNET2Caller",
+                null,
+                setup
+                );
+
+            try
+            {
+                // create instance of object to execute by using CreateInstanceAndUnwrap on the domain object
+                // returns a remoting proxy you can use to communicate with in your main domain
+                // the object behind the proxy must implement MarshalByRefObject or else it will just serialize
+                // a copy back to the main domain!
+                var handle = net2CallerDomain.CreateComInstanceFrom(net2CallerType.Assembly.ManifestModule.FullyQualifiedName, net2CallerType.FullName);
+                var prg = handle.Unwrap() as _BET_.Playground.Interop.COM.NET2Caller.MainWrapper;
+                var result = prg.CallCOM();
+                
+                Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail(ex.Message);
+            }
+            finally
+            {
+                AppDomain.Unload(net2CallerDomain);
+            }
+
             Assert.Inconclusive("applies not the app.manifest");
         }
     }
