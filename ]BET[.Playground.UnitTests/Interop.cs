@@ -2,9 +2,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using _BET_.Playground.Interop.COM.NET4Callee;
 using System.Reflection;
-using _BET_.Playground.Core;
+using _BET_.Playground.NET20Core;
 using System.Linq;
 using System.Xml;
+using System.Collections.Generic;
 
 namespace _BET_.Playground.UnitTests
 {
@@ -27,11 +28,23 @@ namespace _BET_.Playground.UnitTests
         private static readonly string TestMethod = "CallCOM";
         private static readonly string TestAssemblyRelativePath = @"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\Playground.Interop.COM.NET2Caller.exe";
         private static readonly string InconclusiveMsg = "app.manifest from target not applied";
-        private static readonly string NET2Config = @"<configuration>  
+        private static readonly string NET2Config = @"<?xml version='1.0' encoding='utf-8'?>
+<configuration>  
     <startup>  
-        <supportedRuntime version='v2.0' />  
+        <supportedRuntime version='v2.0.50727' />  
     </startup>  
 </configuration>";
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET2Config()
+        {
+            // just verify that it is solid xml
+            XmlDocument xml = new XmlDocument();
+            xml.LoadXml(NET2Config);
+
+            Assert.IsNotNull(xml.InnerXml);
+        }
 
         [TestMethod]
         [TestCategory("Interop")]
@@ -48,7 +61,7 @@ namespace _BET_.Playground.UnitTests
 
         [TestMethod]
         [TestCategory("Interop")]
-        public void TestLoadCorrectAssemblies()
+        public void TestLoadCorrectAssemblies1()
         {
             Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
             var assemblyNames = net2Caller.GetReferencedAssemblies();
@@ -65,6 +78,94 @@ namespace _BET_.Playground.UnitTests
             Assert.AreEqual<int>(0, errors, $"{errors} of {assemblyNames.Length} are loaded in wrong version!");
         }
 
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestLoadCorrectAssemblies2()
+        {
+            string net2Path = @"C:\Windows\Microsoft.NET\Framework\v2.0.50727\{0}.dll";
+
+            Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
+            var assemblyNames = net2Caller.GetReferencedAssemblies();
+
+            int errors = 0;
+
+            foreach (var an in assemblyNames)
+            {
+                var rA = Assembly.LoadFile(string.Format(net2Path, an.Name));
+                if (rA.FullName != an.FullName)
+                    errors += 1;
+            }
+
+            Assert.AreEqual<int>(0, errors, $"{errors} of {assemblyNames.Length} are loaded in wrong version!");
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestLoadCorrectAssemblies3()
+        {
+            string net2Path = @"C:\Windows\Microsoft.NET\Framework\v2.0.50727\{0}.dll";
+            Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
+            var assemblyNames = net2Caller.GetReferencedAssemblies();
+
+            int errors = 0;
+
+            foreach (var an in assemblyNames)
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(string.Format(net2Path, an.Name));
+
+                var rA = Assembly.Load(bytes);
+                if (rA.FullName != an.FullName)
+                    errors += 1;
+            }
+
+            Assert.AreEqual<int>(0, errors, $"{errors} of {assemblyNames.Length} are loaded in wrong version!");
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestLoadCorrectAssemblies4()
+        {
+            string net2Path = @"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\{0}.dll";
+            Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
+            var assemblyNames = net2Caller.GetReferencedAssemblies();
+
+            int errors = 0;
+
+            foreach (var an in assemblyNames)
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(string.Format(net2Path, an.Name));
+
+                var rA = Assembly.Load(bytes);
+                if (rA.FullName != an.FullName)
+                    errors += 1;
+            }
+
+            Assert.AreEqual<int>(0, errors, $"{errors} of {assemblyNames.Length} are loaded in wrong version!");
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestLoadCorrectAssemblies5()
+        {
+            string net2Path = @"C:\Windows\Microsoft.NET\Framework\v2.0.50727\{0}.dll";
+            Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
+            var assemblyNames = net2Caller.GetReferencedAssemblies();
+
+            int errors = 0;
+
+            foreach (var an in assemblyNames)
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(string.Format(net2Path, an.Name));
+
+                var rA = Assembly.ReflectionOnlyLoadFrom(string.Format(net2Path, an.Name));
+                if (rA.FullName != an.FullName)
+                    errors += 1;
+            }
+
+            Assert.AreEqual<int>(0, errors, $"{errors} of {assemblyNames.Length} are loaded in wrong version!");
+            Assert.Inconclusive("loaded, but reflection only");
+        }
+        
         [TestMethod]
         [TestCategory("Interop")]
         public void TestNET2Caller_Try1()
@@ -242,14 +343,6 @@ namespace _BET_.Playground.UnitTests
             }
         }
 
-        protected static Assembly AssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
-            var name = net2Caller.GetReferencedAssemblies().FirstOrDefault(a => a.FullName == args.Name);
-
-            return Assembly.Load(name);
-        }
-
         [TestMethod]
         [TestCategory("Interop")]
         public void TestNET2Caller_AppDomain2_CustomDomain3()
@@ -262,13 +355,16 @@ namespace _BET_.Playground.UnitTests
 
             AppDomainSetup setup = new AppDomainSetup()
             {
-                ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
+                //ApplicationBase = net2Caller.CodeBase, --> error code 2
+                ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase, // --> error code 3
                 ApplicationName = "TestNET2Caller",
                 SandboxInterop = true,
                 ShadowCopyFiles = Boolean.TrueString,
                 TargetFrameworkName = ".NETFramework,Version=v2.0",
                 ConfigurationFile = xml.InnerXml
             };
+
+            setup.SetConfigurationBytes(System.Text.Encoding.UTF8.GetBytes(NET2Config));
 
             System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
             evidence.AddAssemblyEvidence(new System.Security.Policy.ApplicationDirectory(@"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\"));
@@ -319,6 +415,8 @@ namespace _BET_.Playground.UnitTests
                 TargetFrameworkName = ".NETFramework,Version=v2.0"
             };
 
+            setup.SetConfigurationBytes(System.Text.Encoding.UTF8.GetBytes(NET2Config));
+
             System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
             evidence.AddAssemblyEvidence(new System.Security.Policy.ApplicationDirectory(@"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\"));
 
@@ -329,7 +427,7 @@ namespace _BET_.Playground.UnitTests
                 setup
                 );
 
-            net2CallerDomain.AssemblyResolve += AssemblyResolve;
+            AssemblyLocator.Init(net2CallerDomain);
 
             try
             {
@@ -419,13 +517,15 @@ namespace _BET_.Playground.UnitTests
             AppDomainSetup setup = new AppDomainSetup()
             {
                 PrivateBinPath = net2Caller.CodeBase,
-                ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase, //net2Caller.CodeBase,
+                ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
+                //ApplicationBase = net2Caller.CodeBase, // -> AssemblyLocator will crash
                 ApplicationName = "TestNET2Caller",
                 SandboxInterop = true,
                 ShadowCopyFiles = Boolean.TrueString,
                 TargetFrameworkName = ".NETFramework,Version=v2.0",
-                ConfigurationFile = xml.InnerXml
             };
+
+            setup.SetConfigurationBytes(System.Text.Encoding.UTF8.GetBytes(NET2Config));
 
             System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
             evidence.AddAssemblyEvidence(new System.Security.Policy.ApplicationDirectory(@"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\"));
@@ -437,7 +537,7 @@ namespace _BET_.Playground.UnitTests
                 setup
                 );
 
-            net2CallerDomain.AssemblyResolve += AssemblyResolve;
+            AssemblyLocator.Init(net2CallerDomain);
 
             try
             {
@@ -449,10 +549,20 @@ namespace _BET_.Playground.UnitTests
             }
             catch (Exception ex)
             {
+                // Could not load type 'System.Reflection.RuntimeAssembly' from 
+                // assembly 'Playground.Interop.COM.NET2Caller, Version=1.0.0.0, 
+                // Culture =neutral, PublicKeyToken=null'
                 if (ex.HResult == -2146233054)
                     Assert.Fail($"Expected Fail 1: {ex.Message}");
+                // Could not load file or assembly 'Playground.Interop.COM.NET2Caller, 
+                // Version =1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of 
+                // its dependencies. Das System kann die angegebene Datei nicht finden.
                 if (ex.HResult == -2147024894)
                     Assert.Fail($"Expected Fail 2: {ex.Message}");
+                // Could not load file or assembly 'Playground.Interop.COM.NET2Caller, 
+                // Version =1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of 
+                // its dependencies. Die Syntax für den Dateinamen, Verzeichnisnamen 
+                // oder die Datenträgerbezeichnung ist falsch.
                 if (ex.HResult == -2147024773)
                     Assert.Fail($"Expected Fail 3: {ex.Message}");
 
@@ -462,6 +572,82 @@ namespace _BET_.Playground.UnitTests
             {
                 AppDomain.Unload(net2CallerDomain);
             }
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET2Caller_AppDomain4_AssemblyLocator()
+        {
+            Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
+
+            AppDomainSetup setup = new AppDomainSetup()
+            {
+                //ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
+                ApplicationBase = net2Caller.CodeBase, // -> AssemblyLocator will crash
+                ApplicationName = "TestNET2Caller",
+                SandboxInterop = true,
+                ShadowCopyFiles = Boolean.TrueString,
+                TargetFrameworkName = ".NETFramework,Version=v2.0",
+            };
+
+            setup.SetConfigurationBytes(System.Text.Encoding.UTF8.GetBytes(NET2Config));
+
+            System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
+            evidence.AddAssemblyEvidence(new System.Security.Policy.ApplicationDirectory(@"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\"));
+
+            // create domain
+            AppDomain net2CallerDomain = AppDomain.CreateDomain(
+                "TestNET4Caller",
+                evidence,
+                setup
+                );
+
+            try
+            {
+                AssemblyLocator.Init(net2CallerDomain);
+            }
+            catch(Exception ex)
+            {
+                Assert.Fail(ex.Message);
+
+                /*
+Could not load file or assembly ']BET[.Playground.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies. Das System kann die angegebene Datei nicht finden.
+                
+                === Pre-bind state information ===
+LOG: DisplayName = ]BET[.Playground.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+ (Fully-specified)
+
+LOG: Appbase = ../]BET[.Playground/]BET[.Playground.Interop.COM.NET2Caller/bin/Debug/Playground.Interop.COM.NET2Caller.exe
+LOG: Initial PrivatePath = ../Projects/]BET[.Playground/]BET[.Playground.Interop.COM.NET2Caller/bin/Debug/Playground.Interop.COM.NET2Caller.exe
+Calling assembly : (Unknown).
+===
+LOG: This bind starts in default load context.
+LOG: Found application configuration file (\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO 14.0\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\TESTWINDOW\vstest.executionengine.x86.exe.Config).
+LOG: Using application configuration file: \PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO 14.0\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\TESTWINDOW\vstest.executionengine.x86.exe.Config
+LOG: Using host configuration file: 
+LOG: Using machine configuration file from \Windows\Microsoft.NET\Framework\v4.0.30319\config\machine.config.
+LOG: Policy not being applied to reference at this time (private, custom, partial, or location-based assembly bind).
+LOG: Attempting download of new URL ../]BET[.Playground/]BET[.Playground.Interop.COM.NET2Caller/bin/Debug/Playground.Interop.COM.NET2Caller.exe/]BET[.Playground.Core.DLL.
+LOG: Attempting download of new URL ../]BET[.Playground/]BET[.Playground.Interop.COM.NET2Caller/bin/Debug/Playground.Interop.COM.NET2Caller.exe/]BET[.Playground.Core/]BET[.Playground.Core.DLL.
+LOG: Attempting download of new URL ../]BET[.Playground/]BET[.Playground.Interop.COM.NET2Caller/bin/Debug/Playground.Interop.COM.NET2Caller.exe/]BET[.Playground.Core.EXE.
+LOG: Attempting download of new URL ../]BET[.Playground/]BET[.Playground.Interop.COM.NET2Caller/bin/Debug/Playground.Interop.COM.NET2Caller.exe/]BET[.Playground.Core/]BET[.Playground.Core.EXE.
+
+
+   at System.Reflection.RuntimeAssembly._nLoad(AssemblyName fileName, String codeBase, Evidence assemblySecurity, RuntimeAssembly locationHint, StackCrawlMark& stackMark, IntPtr pPrivHostBinder, Boolean throwOnFileNotFound, Boolean forIntrospection, Boolean suppressSecurityChecks)
+   at System.Reflection.RuntimeAssembly.nLoad(AssemblyName fileName, String codeBase, Evidence assemblySecurity, RuntimeAssembly locationHint, StackCrawlMark& stackMark, IntPtr pPrivHostBinder, Boolean throwOnFileNotFound, Boolean forIntrospection, Boolean suppressSecurityChecks)
+   at System.Reflection.RuntimeAssembly.InternalLoadAssemblyName(AssemblyName assemblyRef, Evidence assemblySecurity, RuntimeAssembly reqAssembly, StackCrawlMark& stackMark, IntPtr pPrivHostBinder, Boolean throwOnFileNotFound, Boolean forIntrospection, Boolean suppressSecurityChecks)
+   at System.Reflection.RuntimeAssembly.InternalLoad(String assemblyString, Evidence assemblySecurity, StackCrawlMark& stackMark, IntPtr pPrivHostBinder, Boolean forIntrospection)
+   at System.Reflection.RuntimeAssembly.InternalLoad(String assemblyString, Evidence assemblySecurity, StackCrawlMark& stackMark, Boolean forIntrospection)
+   at System.Reflection.Assembly.Load(String assemblyString)
+   at System.Runtime.Serialization.FormatterServices.LoadAssemblyFromString(String assemblyName)
+   at System.Reflection.MemberInfoSerializationHolder..ctor(SerializationInfo info, StreamingContext context)
+   at System.AppDomain.add_AssemblyLoad(AssemblyLoadEventHandler value)
+   at _BET_.Playground.Core.AssemblyLocator.Init(AppDomain domain) in ..\]BET[.Playground\]BET[.Playground.Core\Assembly.cs:line 14
+   at _BET_.Playground.UnitTests.Interop.TestNET2Caller_AppDomain3_CreateCom2() in ..\]BET[.Playground\]BET[.Playground.UnitTests\Interop.cs:line 529
+
+                 */
+            }
+
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace _BET_.Playground.Core
+namespace _BET_.Playground.NET20Core
 {
     public static class AssemblyLocator
     {
@@ -25,7 +25,7 @@ namespace _BET_.Playground.Core
         static void AssemblyLoad(object sender, AssemblyLoadEventArgs args)
         {
             Assembly assembly = args.LoadedAssembly;
-            if(assemblies == null)
+            if (assemblies == null)
                 assemblies = new Dictionary<string, Assembly>();
             if (!assemblies.ContainsKey(assembly.FullName))
                 assemblies.Add(assembly.FullName, assembly);

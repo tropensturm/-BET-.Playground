@@ -7,7 +7,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>_BET_.Playground.UnitTests</RootNamespace>
-    <AssemblyName>]BET[.Playground.UnitTests</AssemblyName>
+    <AssemblyName>BET.Playground.UnitTests</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -68,6 +68,10 @@
     <ProjectReference Include="..\]BET[.Playground.Interop.COM.NET4Callee\]BET[.Playground.Interop.COM.NET4Callee.csproj">
       <Project>{1e2410f1-8b72-4c29-9dd7-358f5f28298f}</Project>
       <Name>]BET[.Playground.Interop.COM.NET4Callee</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\]BET[.Playground.NET20Core\]BET[.Playground.NET20Core.csproj">
+      <Project>{8fdb1c26-e4bb-4862-842d-ee454b864809}</Project>
+      <Name>]BET[.Playground.NET20Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
