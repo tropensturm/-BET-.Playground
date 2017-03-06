@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using _BET_.Playground.Interop.COM.NET4Callee;
 using System.Reflection;
 using _BET_.Playground.NET20Core;
 using System.Linq;
@@ -55,19 +54,6 @@ namespace _BET_.Playground.UnitTests
             xml.LoadXml(NET2Config);
 
             Assert.IsNotNull(xml.InnerXml);
-        }
-
-        [TestMethod]
-        [TestCategory("Interop")]
-        public void TestNET4Callee()
-        {
-            var target4 = new Callee();
-            var target4Result = target4.WhoIAm();
-            var target4Adapter = new COMAdapter();
-            var target4AdapterResult = target4Adapter.WhoIAm();
-
-            Assert.AreEqual<string>(target4Result, target4AdapterResult);
-            Assert.AreEqual<string>("NET Dll Version v4.0.30319", target4Result);
         }
 
         [TestMethod]
@@ -134,28 +120,6 @@ namespace _BET_.Playground.UnitTests
 
         [TestMethod]
         [TestCategory("Interop")]
-        public void TestLoadCorrectAssemblies4()
-        {
-            string net2Path = @"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\{0}.dll";
-            Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
-            var assemblyNames = net2Caller.GetReferencedAssemblies();
-
-            int errors = 0;
-
-            foreach (var an in assemblyNames)
-            {
-                byte[] bytes = System.IO.File.ReadAllBytes(string.Format(net2Path, an.Name));
-
-                var rA = Assembly.Load(bytes);
-                if (rA.FullName != an.FullName)
-                    errors += 1;
-            }
-
-            Assert.AreEqual<int>(0, errors, $"{errors} of {assemblyNames.Length} are loaded in wrong version!");
-        }
-
-        [TestMethod]
-        [TestCategory("Interop")]
         public void TestLoadCorrectAssemblies5()
         {
             string net2Path = @"C:\Windows\Microsoft.NET\Framework\v2.0.50727\{0}.dll";
@@ -177,16 +141,16 @@ namespace _BET_.Playground.UnitTests
             Assert.Inconclusive("loaded, but reflection only");
         }
         
-        [TestMethod]
-        [TestCategory("Interop")]
-        public void TestNET2Caller_Try1()
-        {
-            var net2CallerType = typeof(_BET_.Playground.Interop.COM.NET2Caller.Program);
-            var result = Helper.InvokeMethodFromObjectByType(net2CallerType, TestObject, TestMethod) as string;
+        //[TestMethod]
+        //[TestCategory("Interop")]
+        //public void TestNET2Caller_Try1()
+        //{
+        //    var net2CallerType = typeof(_BET_.Playground.Interop.COM.NET2Caller.Program);
+        //    var result = Helper.InvokeMethodFromObjectByType(net2CallerType, TestObject, TestMethod) as string;
 
-            Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
-            Assert.Inconclusive(InconclusiveMsg);
-        }
+        //    Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
+        //    Assert.Inconclusive(InconclusiveMsg);
+        //}
 
         [TestMethod]
         [TestCategory("Interop")]
@@ -194,7 +158,7 @@ namespace _BET_.Playground.UnitTests
         {
             var result = Helper.InvokeMethodFromObjectByPath(TestAssemblyRelativePath, TestObject, TestMethod) as string;
 
-            Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
+            Assert.AreEqual<string>(ErrorMsg, result); // fail
             Assert.Inconclusive(InconclusiveMsg);
         }
 
@@ -250,12 +214,12 @@ namespace _BET_.Playground.UnitTests
                 // returns a remoting proxy you can use to communicate with in your main domain
                 // the object behind the proxy must implement MarshalByRefObject or else it will just serialize
                 // a copy back to the main domain!
-                var prg = net2CallerDomain.CreateInstanceAndUnwrap(net2Caller.FullName, net2Caller.GetType().FullName)
-                    as _BET_.Playground.Interop.COM.NET2Caller.MainWrapper;
+                var prg = net2CallerDomain.CreateInstanceAndUnwrap(net2Caller.FullName, net2Caller.GetType().FullName);
 
-                var result = prg.CallCOM();
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
 
-                Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
                 Assert.Inconclusive(InconclusiveMsg);
             }
             catch (Exception ex)
@@ -349,10 +313,13 @@ namespace _BET_.Playground.UnitTests
 
             try
             {
-                var prg = net2CallerDomain.CreateInstanceAndUnwrap(net2Caller.FullName, net2Caller.GetType().FullName) 
-                    as _BET_.Playground.Interop.COM.NET2Caller.MainWrapper;
+                var prg = net2CallerDomain.CreateInstanceAndUnwrap(net2Caller.FullName, net2Caller.GetType().FullName);
 
-                var result = prg.CallCOM();
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
             }
             catch(Exception ex)
             {
@@ -453,10 +420,13 @@ namespace _BET_.Playground.UnitTests
 
             try
             {
-                var prg = net2CallerDomain.CreateInstanceAndUnwrap(net2Caller.FullName, net2Caller.GetType().FullName)
-                    as _BET_.Playground.Interop.COM.NET2Caller.MainWrapper;
+                var prg = net2CallerDomain.CreateInstanceAndUnwrap(net2Caller.FullName, net2Caller.GetType().FullName);
 
-                var result = prg.CallCOM();
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
             }
             catch (Exception ex)
             {
@@ -560,10 +530,13 @@ namespace _BET_.Playground.UnitTests
 
             try
             {
-                var prg = net2CallerDomain.CreateInstanceAndUnwrap(net2Caller.FullName, net2Caller.GetType().FullName)
-                    as _BET_.Playground.Interop.COM.NET2Caller.MainWrapper;
+                var prg = net2CallerDomain.CreateInstanceAndUnwrap(net2Caller.FullName, net2Caller.GetType().FullName);
 
-                var result = prg.CallCOM();
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
             }
             catch (Exception ex)
             {
@@ -668,10 +641,13 @@ namespace _BET_.Playground.UnitTests
 
             try
             {
-                var prg = net2CallerDomain.CreateInstanceAndUnwrap(net2Caller.FullName, net2Caller.GetType().FullName)
-                    as _BET_.Playground.Interop.COM.NET2Caller.MainWrapper;
+                var prg = net2CallerDomain.CreateInstanceAndUnwrap(net2Caller.FullName, net2Caller.GetType().FullName);
 
-                var result = prg.CallCOM();
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
             }
             catch (Exception ex)
             {
@@ -717,7 +693,7 @@ namespace _BET_.Playground.UnitTests
                 setup
                 );
 
-            AssemblyLocator.Init(net45CallerDomain);
+            _BET_.Playground.Core.AssemblyLocator.Init(net45CallerDomain);
 
             try
             {
@@ -774,10 +750,13 @@ namespace _BET_.Playground.UnitTests
             try
             {
                 var handle = net2CallerDomain.CreateComInstanceFrom(net2Caller.ManifestModule.FullyQualifiedName, net2Caller.GetType().FullName);
-                var prg = handle.Unwrap() as _BET_.Playground.Interop.COM.NET2Caller.MainWrapper;
-                var result = prg.CallCOM();
+                var prg = handle.Unwrap();
 
-                Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
             }
             catch (Exception ex)
             {
@@ -855,10 +834,6 @@ namespace _BET_.Playground.UnitTests
         {
             Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
 
-            // just verify that it is solid xml
-            XmlDocument xml = new XmlDocument();
-            xml.LoadXml(NET2Config);
-
             AppDomainSetup setup = new AppDomainSetup()
             {
                 PrivateBinPath = net2Caller.CodeBase,
@@ -887,10 +862,13 @@ namespace _BET_.Playground.UnitTests
             try
             {
                 var handle = net2CallerDomain.CreateComInstanceFrom(net2Caller.ManifestModule.FullyQualifiedName, net2Caller.GetType().FullName);
-                var prg = handle.Unwrap() as _BET_.Playground.Interop.COM.NET2Caller.MainWrapper;
-                var result = prg.CallCOM();
+                var prg = handle.Unwrap();
 
-                Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
             }
             catch (Exception ex)
             {
@@ -916,6 +894,75 @@ namespace _BET_.Playground.UnitTests
             finally
             {
                 AppDomain.Unload(net2CallerDomain);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET45Caller_AppDomain3_CreateCom2()
+        {
+            Assembly net45Caller = Assembly.LoadFrom(TestAssembly45RelativePath);
+
+            AppDomainSetup setup = new AppDomainSetup()
+            {
+                PrivateBinPath = net45Caller.CodeBase,
+                ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
+                //ApplicationBase = net45Caller.CodeBase, // -> AssemblyLocator will crash
+                ApplicationName = "TestNET45Caller",
+                SandboxInterop = true,
+                ShadowCopyFiles = Boolean.TrueString,
+                TargetFrameworkName = ".NETFramework,Version=v4.5",
+            };
+
+            setup.SetConfigurationBytes(System.Text.Encoding.UTF8.GetBytes(NET45Config));
+
+            System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
+            evidence.AddAssemblyEvidence(new System.Security.Policy.ApplicationDirectory(@"..\..\..\]BET[.Playground.Interop.COM.NET45Caller\bin\Debug\"));
+
+            // create domain
+            AppDomain net45CallerDomain = AppDomain.CreateDomain(
+                "TestNET45Caller",
+                evidence,
+                setup
+                );
+
+            _BET_.Playground.Core.AssemblyLocator.Init(net45CallerDomain);
+
+            try
+            {
+                var handle = net45CallerDomain.CreateComInstanceFrom(net45Caller.ManifestModule.FullyQualifiedName, net45Caller.GetType().FullName);
+                var prg = handle.Unwrap();
+
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
+            }
+            catch (Exception ex)
+            {
+                // Could not load type 'System.Reflection.RuntimeAssembly' from 
+                // assembly 'Playground.Interop.COM.NET2Caller, Version=1.0.0.0, 
+                // Culture =neutral, PublicKeyToken=null'
+                if (ex.HResult == -2146233054)
+                    Assert.Fail($"Expected Fail 1: {ex.Message}");
+                // Could not load file or assembly 'Playground.Interop.COM.NET2Caller, 
+                // Version =1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of 
+                // its dependencies. Das System kann die angegebene Datei nicht finden.
+                if (ex.HResult == -2147024894)
+                    Assert.Fail($"Expected Fail 2: {ex.Message}");
+                // Could not load file or assembly 'Playground.Interop.COM.NET2Caller, 
+                // Version =1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of 
+                // its dependencies. Die Syntax für den Dateinamen, Verzeichnisnamen 
+                // oder die Datenträgerbezeichnung ist falsch.
+                if (ex.HResult == -2147024773)
+                    Assert.Fail($"Expected Fail 3: {ex.Message}");
+
+                Assert.Fail($"Unknown Fail: {ex.Message}");
+            }
+            finally
+            {
+                AppDomain.Unload(net45CallerDomain);
             }
         }
 
@@ -991,6 +1038,44 @@ LOG: Attempting download of new URL ../]BET[.Playground/]BET[.Playground.Interop
    at _BET_.Playground.UnitTests.Interop.TestNET2Caller_AppDomain3_CreateCom2() in ..\]BET[.Playground\]BET[.Playground.UnitTests\Interop.cs:line 529
 
                  */
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET45Caller_AppDomain4_AssemblyLocator()
+        {
+            Assembly net45Caller = Assembly.LoadFrom(TestAssembly45RelativePath);
+
+            AppDomainSetup setup = new AppDomainSetup()
+            {
+                //ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
+                ApplicationBase = net45Caller.CodeBase, // -> AssemblyLocator will crash
+                ApplicationName = "TestNET45Caller",
+                SandboxInterop = true,
+                ShadowCopyFiles = Boolean.TrueString,
+                TargetFrameworkName = ".NETFramework,Version=v4.5",
+            };
+
+            setup.SetConfigurationBytes(System.Text.Encoding.UTF8.GetBytes(NET45Config));
+
+            System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
+            evidence.AddAssemblyEvidence(new System.Security.Policy.ApplicationDirectory(@"..\..\..\]BET[.Playground.Interop.COM.NET45Caller\bin\Debug\"));
+
+            // create domain
+            AppDomain net45CallerDomain = AppDomain.CreateDomain(
+                "TestNET45Caller",
+                evidence,
+                setup
+                );
+
+            try
+            {
+                _BET_.Playground.Core.AssemblyLocator.Init(net45CallerDomain);
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail(ex.Message);
             }
         }
 
