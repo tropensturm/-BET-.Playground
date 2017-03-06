@@ -230,8 +230,14 @@ namespace _BET_.Playground.UnitTests
             }
             catch (Exception ex)
             {
-                Assert.AreEqual<int>(ex.HResult, -2146233054, "failed as expected");
-                Assert.Inconclusive(InconclusiveMsg);
+                if (ex.HResult == -2146233054)
+                    Assert.Fail($"Expected Fail 1: {ex.Message}");
+                if (ex.HResult == -2147024894)
+                    Assert.Fail($"Expected Fail 2: {ex.Message}");
+                if (ex.HResult == -2147024773)
+                    Assert.Fail($"Expected Fail 3: {ex.Message}");
+
+                Assert.Fail($"Unknown Fail: {ex.Message}");
             }
             finally
             {
@@ -658,6 +664,7 @@ LOG: Attempting download of new URL ../]BET[.Playground/]BET[.Playground.Interop
             p.StartInfo.Arguments = "-UT";
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.UseShellExecute = false; // implicitly required when redirecting output
+            p.StartInfo.CreateNoWindow = true; // makes sense to surpress it
             p.Start();
             while (!p.StandardOutput.EndOfStream)
             {
