@@ -25,6 +25,7 @@ namespace _BET_.Playground.UnitTests
 #endif
         }
 
+        private static readonly string ErrorMsg = "type not found, check your manifest!";
         private static readonly string TestObject = "_BET_.Playground.Interop.COM.NET2Caller.MainWrapper";
         private static readonly string TestMethod = "CallCOM";
         private static readonly string TestAssemblyRelativePath = @"..\..\..\]BET[.Playground.Interop.COM.NET2Caller\bin\Debug\Playground.Interop.COM.NET2Caller.exe";
@@ -33,6 +34,15 @@ namespace _BET_.Playground.UnitTests
 <configuration>  
     <startup>  
         <supportedRuntime version='v2.0.50727' />  
+    </startup>  
+</configuration>";
+
+        private static readonly string TestObject45 = "_BET_.Playground.Interop.COM.NET45Caller.MainWrapper";
+        private static readonly string TestAssembly45RelativePath = @"..\..\..\]BET[.Playground.Interop.COM.NET45Caller\bin\Debug\BET.Playground.Interop.COM.NET45Caller.exe";
+        private static readonly string NET45Config = @"<?xml version='1.0' encoding='utf-8'?>
+<configuration>  
+    <startup>  
+        <supportedRuntime version='v4.0' sku='.NETFramework,Version=v4.5'/>  
     </startup>  
 </configuration>";
 
@@ -190,11 +200,31 @@ namespace _BET_.Playground.UnitTests
 
         [TestMethod]
         [TestCategory("Interop")]
+        public void TestNET45Caller_Try2()
+        {
+            var result = Helper.InvokeMethodFromObjectByPath(TestAssembly45RelativePath, TestObject45, TestMethod) as string;
+            
+            Assert.AreEqual<string>(ErrorMsg, result); // fail
+            Assert.Inconclusive(InconclusiveMsg);
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
         public void TestNET2Caller_Try3()
         {
             var result = Helper.InvokeMethodFromCOMObjectByAssembly(TestAssemblyRelativePath, TestObject, TestMethod, null) as string;
 
-            Assert.AreEqual<string>(_BET_.Playground.Interop.COM.NET2Caller.MainWrapper.ErrorMsg, result); // fail
+            Assert.AreEqual<string>(ErrorMsg, result); // fail
+            Assert.Inconclusive(InconclusiveMsg);
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET45Caller_Try3()
+        {
+            var result = Helper.InvokeMethodFromCOMObjectByAssembly(TestAssembly45RelativePath, TestObject45, TestMethod, null) as string;
+
+            Assert.AreEqual<string>(ErrorMsg, result); // fail
             Assert.Inconclusive(InconclusiveMsg);
         }
 
@@ -242,6 +272,52 @@ namespace _BET_.Playground.UnitTests
             finally
             {
                 AppDomain.Unload(net2CallerDomain);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET45Caller_AppDomain1()
+        {
+            Assembly net45Caller = Assembly.LoadFrom(TestAssembly45RelativePath);
+
+            // setup
+            AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
+
+            // create domain
+            AppDomain net45CallerDomain = AppDomain.CreateDomain(
+                "TestNET45Caller",
+                AppDomain.CurrentDomain.Evidence,
+                setup
+                );
+
+            try
+            {
+                // create instance of object to execute by using CreateInstanceAndUnwrap on the domain object
+                // returns a remoting proxy you can use to communicate with in your main domain
+                // the object behind the proxy must implement MarshalByRefObject or else it will just serialize
+                // a copy back to the main domain!
+                var prg = net45CallerDomain.CreateInstanceAndUnwrap(net45Caller.FullName, net45Caller.GetType().FullName);
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233054)
+                    Assert.Fail($"Expected Fail 1: {ex.Message}");
+                if (ex.HResult == -2147024894)
+                    Assert.Fail($"Expected Fail 2: {ex.Message}");
+                if (ex.HResult == -2147024773)
+                    Assert.Fail($"Expected Fail 3: {ex.Message}");
+
+                Assert.Fail($"Unknown Fail: {ex.Message}");
+            }
+            finally
+            {
+                AppDomain.Unload(net45CallerDomain);
             }
         }
 
@@ -297,13 +373,62 @@ namespace _BET_.Playground.UnitTests
 
         [TestMethod]
         [TestCategory("Interop")]
+        public void TestNET45Caller_AppDomain2_CustomDomain1()
+        {
+            Assembly net45Caller = Assembly.LoadFrom(TestAssembly45RelativePath);
+
+            AppDomainSetup setup = new AppDomainSetup()
+            {
+                PrivateBinPath = net45Caller.CodeBase,
+                ApplicationBase = net45Caller.CodeBase,
+                ApplicationName = "TestNET45Caller",
+                SandboxInterop = true,
+                ShadowCopyFiles = Boolean.TrueString,
+                TargetFrameworkName = ".NETFramework,Version=v4.5"
+            };
+
+            System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
+            evidence.AddAssemblyEvidence(new System.Security.Policy.ApplicationDirectory(@"..\..\..\]BET[.Playground.Interop.COM.NET45Caller\bin\Debug\"));
+
+            // create domain
+            AppDomain net45CallerDomain = AppDomain.CreateDomain(
+                "TestNET45Caller",
+                evidence,
+                setup
+                );
+
+            try
+            {
+                var prg = net45CallerDomain.CreateInstanceAndUnwrap(net45Caller.FullName, net45Caller.GetType().FullName);
+
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233054)
+                    Assert.Fail($"Expected Fail 1: {ex.Message}");
+                if (ex.HResult == -2147024894)
+                    Assert.Fail($"Expected Fail 2: {ex.Message}");
+                if (ex.HResult == -2147024773)
+                    Assert.Fail($"Expected Fail 3: {ex.Message}");
+
+                Assert.Fail($"Unknown Fail: {ex.Message}");
+            }
+            finally
+            {
+                AppDomain.Unload(net45CallerDomain);
+            }
+        }
+        
+        [TestMethod]
+        [TestCategory("Interop")]
         public void TestNET2Caller_AppDomain2_CustomDomain2()
         {
             Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
-
-            // just verify that it is solid xml
-            XmlDocument xml = new XmlDocument();
-            xml.LoadXml(NET2Config);
 
             AppDomainSetup setup = new AppDomainSetup()
             {
@@ -313,7 +438,7 @@ namespace _BET_.Playground.UnitTests
                 SandboxInterop = true,
                 ShadowCopyFiles = Boolean.TrueString,
                 TargetFrameworkName = ".NETFramework,Version=v2.0",
-                ConfigurationFile = xml.InnerXml
+                ConfigurationFile = NET2Config
             };
 
             System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
@@ -347,6 +472,60 @@ namespace _BET_.Playground.UnitTests
             finally
             {
                 AppDomain.Unload(net2CallerDomain);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET45Caller_AppDomain2_CustomDomain2()
+        {
+            Assembly net45Caller = Assembly.LoadFrom(TestAssembly45RelativePath);
+
+            AppDomainSetup setup = new AppDomainSetup()
+            {
+                PrivateBinPath = net45Caller.CodeBase,
+                ApplicationBase = net45Caller.CodeBase,
+                ApplicationName = "TestNET45Caller",
+                SandboxInterop = true,
+                ShadowCopyFiles = Boolean.TrueString,
+                TargetFrameworkName = ".NETFramework,Version=v4.5",
+                ConfigurationFile = NET45Config
+            };
+
+            System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
+            evidence.AddAssemblyEvidence(new System.Security.Policy.ApplicationDirectory(@"..\..\..\]BET[.Playground.Interop.COM.NET45Caller\bin\Debug\"));
+
+            // create domain
+            AppDomain net45CallerDomain = AppDomain.CreateDomain(
+                "TestNET45Caller",
+                evidence,
+                setup
+                );
+
+            try
+            {
+                var prg = net45CallerDomain.CreateInstanceAndUnwrap(net45Caller.FullName, net45Caller.GetType().FullName);
+
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233054)
+                    Assert.Fail($"Expected Fail 1: {ex.Message}");
+                if (ex.HResult == -2147024894)
+                    Assert.Fail($"Expected Fail 2: {ex.Message}");
+                if (ex.HResult == -2147024773)
+                    Assert.Fail($"Expected Fail 3: {ex.Message}");
+
+                Assert.Fail($"Unknown Fail: {ex.Message}");
+            }
+            finally
+            {
+                AppDomain.Unload(net45CallerDomain);
             }
         }
 
@@ -402,7 +581,62 @@ namespace _BET_.Playground.UnitTests
                 AppDomain.Unload(net2CallerDomain);
             }
         }
-        
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET45Caller_AppDomain2_CustomDomain3()
+        {
+            Assembly net45Caller = Assembly.LoadFrom(TestAssembly45RelativePath);
+
+            AppDomainSetup setup = new AppDomainSetup()
+            {
+                //ApplicationBase = net2Caller.CodeBase, --> error code 2
+                ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase, // --> error code 3
+                ApplicationName = "TestNET45Caller",
+                SandboxInterop = true,
+                ShadowCopyFiles = Boolean.TrueString,
+                TargetFrameworkName = ".NETFramework,Version=v4.5",
+                ConfigurationFile = NET45Config
+            };
+
+            setup.SetConfigurationBytes(System.Text.Encoding.UTF8.GetBytes(NET45Config));
+
+            System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
+            evidence.AddAssemblyEvidence(new System.Security.Policy.ApplicationDirectory(@"..\..\..\]BET[.Playground.Interop.COM.NET45Caller\bin\Debug\"));
+
+            // create domain
+            AppDomain net45CallerDomain = AppDomain.CreateDomain(
+                "TestNET45Caller",
+                evidence,
+                setup
+                );
+
+            try
+            {
+                var prg = net45CallerDomain.CreateInstanceAndUnwrap(net45Caller.FullName, net45Caller.GetType().FullName);
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233054)
+                    Assert.Fail($"Expected Fail 1: {ex.Message}");
+                if (ex.HResult == -2147024894)
+                    Assert.Fail($"Expected Fail 2: {ex.Message}");
+                if (ex.HResult == -2147024773)
+                    Assert.Fail($"Expected Fail 3: {ex.Message}");
+
+                Assert.Fail($"Unknown Fail: {ex.Message}");
+            }
+            finally
+            {
+                AppDomain.Unload(net45CallerDomain);
+            }
+        }
+
         [TestMethod]
         [TestCategory("Interop")]
         public void TestNET2Caller_AppDomain2_CustomDomain4()
@@ -458,6 +692,61 @@ namespace _BET_.Playground.UnitTests
 
         [TestMethod]
         [TestCategory("Interop")]
+        public void TestNET45Caller_AppDomain2_CustomDomain4()
+        {
+            Assembly net45Caller = Assembly.LoadFrom(TestAssembly45RelativePath);
+
+            AppDomainSetup setup = new AppDomainSetup()
+            {
+                ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
+                ApplicationName = "TestNET45Caller",
+                SandboxInterop = true,
+                ShadowCopyFiles = Boolean.TrueString,
+                TargetFrameworkName = ".NETFramework,Version=v4.5"
+            };
+
+            setup.SetConfigurationBytes(System.Text.Encoding.UTF8.GetBytes(NET45Config));
+
+            System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
+            evidence.AddAssemblyEvidence(new System.Security.Policy.ApplicationDirectory(@"..\..\..\]BET[.Playground.Interop.COM.NET45Caller\bin\Debug\"));
+
+            // create domain
+            AppDomain net45CallerDomain = AppDomain.CreateDomain(
+                "TestNET45Caller",
+                evidence,
+                setup
+                );
+
+            AssemblyLocator.Init(net45CallerDomain);
+
+            try
+            {
+                var prg = net45CallerDomain.CreateInstanceAndUnwrap(net45Caller.FullName, net45Caller.GetType().FullName);
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233054)
+                    Assert.Fail($"Expected Fail 1: {ex.Message}");
+                if (ex.HResult == -2147024894)
+                    Assert.Fail($"Expected Fail 2: {ex.Message}");
+                if (ex.HResult == -2147024773)
+                    Assert.Fail($"Expected Fail 3: {ex.Message}");
+
+                Assert.Fail($"Unknown Fail: {ex.Message}");
+            }
+            finally
+            {
+                AppDomain.Unload(net45CallerDomain);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
         public void TestNET2Caller_AppDomain3_CreateCom1()
         {
             Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
@@ -504,6 +793,59 @@ namespace _BET_.Playground.UnitTests
             finally
             {
                 AppDomain.Unload(net2CallerDomain);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET45Caller_AppDomain3_CreateCom1()
+        {
+            Assembly net45Caller = Assembly.LoadFrom(TestAssembly45RelativePath);
+
+            AppDomainSetup setup = new AppDomainSetup()
+            {
+                PrivateBinPath = net45Caller.CodeBase,
+                ApplicationBase = net45Caller.CodeBase,
+                ApplicationName = "TestNET45Caller",
+                SandboxInterop = true,
+                ShadowCopyFiles = Boolean.TrueString,
+                TargetFrameworkName = ".NETFramework,Version=v4.5"
+            };
+
+            System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
+            evidence.AddAssemblyEvidence(new System.Security.Policy.ApplicationDirectory(@"..\..\..\]BET[.Playground.Interop.COM.NET45Caller\bin\Debug\"));
+
+            // create domain
+            AppDomain net45CallerDomain = AppDomain.CreateDomain(
+                "TestNET45Caller",
+                evidence,
+                setup
+                );
+
+            try
+            {
+                var handle = net45CallerDomain.CreateComInstanceFrom(net45Caller.ManifestModule.FullyQualifiedName, net45Caller.GetType().FullName);
+                var prg = handle.Unwrap();
+                var callCom = prg.GetType().GetMethod("CallCom");
+                var result = callCom.Invoke(prg, null) as string;
+
+                Assert.AreEqual<string>(ErrorMsg, result); // fail
+                Assert.Inconclusive(InconclusiveMsg);
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233054)
+                    Assert.Fail($"Expected Fail 1: {ex.Message}");
+                if (ex.HResult == -2147024894)
+                    Assert.Fail($"Expected Fail 2: {ex.Message}");
+                if (ex.HResult == -2147024773)
+                    Assert.Fail($"Expected Fail 3: {ex.Message}");
+
+                Assert.Fail($"Unknown Fail: {ex.Message}");
+            }
+            finally
+            {
+                AppDomain.Unload(net45CallerDomain);
             }
         }
 
@@ -661,7 +1003,7 @@ LOG: Attempting download of new URL ../]BET[.Playground/]BET[.Playground.Interop
             var p = new Process();
 
             p.StartInfo.FileName = TestAssemblyRelativePath;
-            p.StartInfo.Arguments = "-UT";
+            p.StartInfo.Arguments = "UT";
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.UseShellExecute = false; // implicitly required when redirecting output
             p.StartInfo.CreateNoWindow = true; // makes sense to surpress it
