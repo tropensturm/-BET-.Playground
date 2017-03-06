@@ -6,6 +6,7 @@ using _BET_.Playground.NET20Core;
 using System.Linq;
 using System.Xml;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace _BET_.Playground.UnitTests
 {
@@ -349,10 +350,6 @@ namespace _BET_.Playground.UnitTests
         {
             Assembly net2Caller = Assembly.LoadFrom(TestAssemblyRelativePath);
 
-            // just verify that it is solid xml
-            XmlDocument xml = new XmlDocument();
-            xml.LoadXml(NET2Config);
-
             AppDomainSetup setup = new AppDomainSetup()
             {
                 //ApplicationBase = net2Caller.CodeBase, --> error code 2
@@ -360,8 +357,8 @@ namespace _BET_.Playground.UnitTests
                 ApplicationName = "TestNET2Caller",
                 SandboxInterop = true,
                 ShadowCopyFiles = Boolean.TrueString,
-                TargetFrameworkName = ".NETFramework,Version=v2.0",
-                ConfigurationFile = xml.InnerXml
+                TargetFrameworkName = ".NETFramework,Version=v2.0", // appdomain is more or less ignoring < 4.5 :(
+                ConfigurationFile = NET2Config
             };
 
             setup.SetConfigurationBytes(System.Text.Encoding.UTF8.GetBytes(NET2Config));
@@ -412,7 +409,7 @@ namespace _BET_.Playground.UnitTests
                 ApplicationName = "TestNET2Caller",
                 SandboxInterop = true,
                 ShadowCopyFiles = Boolean.TrueString,
-                TargetFrameworkName = ".NETFramework,Version=v2.0"
+                TargetFrameworkName = ".NETFramework,Version=v2.0" // appdomain is more or less ignoring < 4.5 :(
             };
 
             setup.SetConfigurationBytes(System.Text.Encoding.UTF8.GetBytes(NET2Config));
@@ -587,7 +584,7 @@ namespace _BET_.Playground.UnitTests
                 ApplicationName = "TestNET2Caller",
                 SandboxInterop = true,
                 ShadowCopyFiles = Boolean.TrueString,
-                TargetFrameworkName = ".NETFramework,Version=v2.0",
+                TargetFrameworkName = ".NETFramework,Version=v2.0", // appdomain is more or less ignoring < 4.5 :(
             };
 
             setup.SetConfigurationBytes(System.Text.Encoding.UTF8.GetBytes(NET2Config));
@@ -647,7 +644,27 @@ LOG: Attempting download of new URL ../]BET[.Playground/]BET[.Playground.Interop
 
                  */
             }
+        }
 
+        [TestMethod]
+        [TestCategory("Interop")]
+        public void TestNET2Caller_Process1()
+        {
+            // this will simply work
+
+            var p = new Process();
+
+            p.StartInfo.FileName = TestAssemblyRelativePath;
+            p.StartInfo.Arguments = "-UT";
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.UseShellExecute = false; // implicitly required when redirecting output
+            p.Start();
+            while (!p.StandardOutput.EndOfStream)
+            {
+                string output = p.StandardOutput.ReadLine();
+                Assert.AreEqual<string>("NET Dll Version v4.0.30319", output);
+                break;
+            }
         }
     }
 }
