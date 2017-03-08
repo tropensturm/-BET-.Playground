@@ -28,7 +28,8 @@ namespace _BET_.Playground.UnitTests
         private static readonly string TestObject45 = "_BET_.Playground.NET45App.MainWrapper";
         private static readonly string TestMethod45 = "Call";
         //private static readonly string TestAssembly45RelativePath = @"..\..\..\]BET[.Playground.NET45App\bin\Debug\Playground.NET45App.exe";
-        private static readonly string TestAssembly45RelativePath = @"..\..\..\deployment\Playground.NET45App.exe";
+        //private static readonly string TestAssembly45RelativePath = @"..\..\..\deployment\Playground.NET45App.exe";
+        private static readonly string TestAssembly45RelativePath = @"C:\Users\mark\OneDrive\Dokumente\Visual Studio 2015\Projects\]BET[.Playground\deployment\Playground.NET45App.exe";
         private static readonly string NET45Config = @"<?xml version='1.0' encoding='utf-8'?>
 <configuration>  
     <startup>  
@@ -83,7 +84,8 @@ namespace _BET_.Playground.UnitTests
                 // the object behind the proxy must implement MarshalByRefObject or else it will just serialize
                 // a copy back to the main domain!
                 var prg = (Proxy) net45AppDomain.CreateInstanceAndUnwrap(proxy.Assembly.FullName, proxy.FullName);
-                
+
+                // this will only work when it is referenced in the project?
                 var assembly = prg.GetAssembly(TestAssembly45RelativePath);
                 var instance = Activator.CreateInstance(assembly.GetType(TestObject45));
 
@@ -131,6 +133,7 @@ namespace _BET_.Playground.UnitTests
             {
                 var prg = (Proxy) net45AppDomain.CreateInstanceAndUnwrap(proxy.Assembly.FullName, proxy.FullName);
 
+                // this will only work when it is referenced in the project?
                 var assembly = prg.GetAssembly(TestAssembly45RelativePath);
                 var instance = Activator.CreateInstance(assembly.GetType(TestObject45));
 

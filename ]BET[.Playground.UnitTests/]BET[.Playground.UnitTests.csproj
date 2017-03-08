@@ -63,6 +63,18 @@
       <Project>{a8d1ed81-e280-4dda-ab1a-ba4abe4199d9}</Project>
       <Name>]BET[.Playground.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\]BET[.Playground.Interop.COM.NET2Caller\]BET[.Playground.Interop.COM.NET2Caller.csproj">
+      <Project>{054d255e-74de-456f-9fe0-e19bcfdd6569}</Project>
+      <Name>]BET[.Playground.Interop.COM.NET2Caller</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\]BET[.Playground.Interop.COM.NET45Caller\]BET[.Playground.Interop.COM.NET45Caller.csproj">
+      <Project>{182ce324-ca49-46ca-ae75-f21769f15731}</Project>
+      <Name>]BET[.Playground.Interop.COM.NET45Caller</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\]BET[.Playground.Interop.COM.NET4Callee\]BET[.Playground.Interop.COM.NET4Callee.csproj">
+      <Project>{1e2410f1-8b72-4c29-9dd7-358f5f28298f}</Project>
+      <Name>]BET[.Playground.Interop.COM.NET4Callee</Name>
+    </ProjectReference>
     <ProjectReference Include="..\]BET[.Playground.NET20Core\]BET[.Playground.NET20Core.csproj">
       <Project>{8fdb1c26-e4bb-4862-842d-ee454b864809}</Project>
       <Name>]BET[.Playground.NET20Core</Name>
