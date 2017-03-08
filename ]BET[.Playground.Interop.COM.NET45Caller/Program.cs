@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace _BET_.Playground.Interop.COM.NET45Caller
 {
-    public class Program
+    public class Program : MarshalByRefObject
     {
         // this will only start when the assembly of NET4Callee is in gac or in local folder
         static void Main(string[] args)

@@ -46,4 +46,26 @@ namespace _BET_.Playground.UnitTests
             return InvokeMethodFromObjectByAssembly(assembly, testObject, testMethod, methodParameters);
         }
     }
+
+    /// <summary>
+    /// I do not get it but it is required or the CreateInstanceAndUnwrap call will crash no matter what I try
+    /// this is creating a remoting object
+    /// 
+    /// my best guess is that CreateInstanceAndUnwrap is not loading all referenced assemblies, with the proxy
+    /// it will load it completley because it is within the same assembly -> than we can load completely with loadfrom
+    /// </summary>
+    internal class Proxy : MarshalByRefObject
+    {
+        public Assembly GetAssembly(string assemblyPath)
+        {
+            try
+            {
+                return Assembly.LoadFrom(assemblyPath);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+    }
 }
