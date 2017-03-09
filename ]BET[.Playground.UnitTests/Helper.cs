@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -44,6 +45,36 @@ namespace _BET_.Playground.UnitTests
         {
             Assembly assembly = Assembly.LoadFrom(assemblyPath);
             return InvokeMethodFromObjectByAssembly(assembly, testObject, testMethod, methodParameters);
+        }
+
+        private static readonly string AssemblyRessource = "_BET_.Playground.UnitTests.Ressources";
+
+        public static string GetAssemblyRessource(int resNo, string value)
+        {
+            return $"{AssemblyRessource}{resNo}.{value}";
+        }
+
+        public static string GetRessourceAsString(int resNo, string ressourceName)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            using (Stream stream = assembly.GetManifestResourceStream(GetAssemblyRessource(resNo, ressourceName)))
+            using (StreamReader reader = new StreamReader(stream, true))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
+        public static byte[] GetRessourceAsByteArray(int resNo, string ressourceName)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            using (var stream = assembly.GetManifestResourceStream(GetAssemblyRessource(resNo, ressourceName)))
+            using (var mstream = new MemoryStream())
+            {
+                stream.CopyTo(mstream);
+                return mstream.ToArray();
+            }
         }
     }
 

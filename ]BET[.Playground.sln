@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "]BET[.Playground.Interop.CO
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "]BET[.Playground.NET45App", "]BET[.Playground.NET45App\]BET[.Playground.NET45App.csproj", "{CCC2917C-32CB-4ED8-A330-D433C1AD25FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "]BET[.Playground.Compile", "]BET[.Playground.Compile\]BET[.Playground.Compile.csproj", "{2046865A-996C-4ADD-9D0F-2792869D6ECA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{CCC2917C-32CB-4ED8-A330-D433C1AD25FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCC2917C-32CB-4ED8-A330-D433C1AD25FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCC2917C-32CB-4ED8-A330-D433C1AD25FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2046865A-996C-4ADD-9D0F-2792869D6ECA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2046865A-996C-4ADD-9D0F-2792869D6ECA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2046865A-996C-4ADD-9D0F-2792869D6ECA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2046865A-996C-4ADD-9D0F-2792869D6ECA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
